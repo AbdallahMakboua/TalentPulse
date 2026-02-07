@@ -1,0 +1,79 @@
+# ── TalentPulse Scoring Weights ──────────────────────────────────
+# Rule-based, configurable. Scores 0–100.
+
+burnout_risk:
+  description: "Early burnout detection from sustained overload + declining engagement"
+  weights:
+    meeting_hours: 0.15          # high → risk
+    after_hours_events: 0.15     # high → risk
+    fragmentation_score: 0.12    # high → risk
+    focus_blocks: -0.10          # high → protective (inverted)
+    unique_collaborators: -0.08  # declining → isolation risk
+    learning_hours: -0.08        # declining → disengagement
+    workload_items: 0.12         # high → overload
+    missed_deadlines: 0.10       # rising → stress signal
+    tasks_completed_trend: -0.10 # declining → burnout indicator
+  thresholds:
+    low: 35
+    high: 65
+
+high_pressure:
+  description: "Current workload intensity"
+  weights:
+    workload_items: 0.20
+    meeting_hours: 0.20
+    meeting_count: 0.15
+    fragmentation_score: 0.15
+    after_hours_events: 0.15
+    focus_blocks: -0.15
+  thresholds:
+    low: 35
+    high: 65
+
+high_potential:
+  description: "Growth trajectory, ownership, impact, collaboration breadth"
+  weights:
+    tasks_completed: 0.15
+    learning_hours: 0.15
+    stretch_assignments: 0.12
+    skill_progress: 0.15
+    unique_collaborators: 0.12
+    cross_team_ratio: 0.10
+    support_actions: 0.12
+    missed_deadlines: -0.09     # low missed = good
+  thresholds:
+    low: 35
+    high: 65
+
+performance_degradation:
+  description: "Declining delivery quality + rising overload"
+  weights:
+    tasks_completed_trend: -0.20  # declining → degradation
+    missed_deadlines: 0.20        # rising → degradation
+    cycle_time_days: 0.15         # increasing → degradation
+    workload_items: 0.10          # high → strain
+    focus_blocks: -0.10           # declining → problem
+    fragmentation_score: 0.10
+    learning_hours: -0.08         # declining → disengagement
+    support_actions: -0.07        # declining → withdrawal
+  thresholds:
+    low: 35
+    high: 65
+
+# Normalization reference ranges per signal (approximate typical ranges)
+normalization:
+  tasks_completed: { min: 0, max: 20 }
+  missed_deadlines: { min: 0, max: 5 }
+  workload_items: { min: 0, max: 25 }
+  cycle_time_days: { min: 0, max: 10 }
+  meeting_hours: { min: 0, max: 25 }
+  meeting_count: { min: 0, max: 30 }
+  fragmentation_score: { min: 0, max: 1 }
+  focus_blocks: { min: 0, max: 10 }
+  after_hours_events: { min: 0, max: 10 }
+  unique_collaborators: { min: 0, max: 20 }
+  cross_team_ratio: { min: 0, max: 1 }
+  support_actions: { min: 0, max: 10 }
+  learning_hours: { min: 0, max: 10 }
+  stretch_assignments: { min: 0, max: 3 }
+  skill_progress: { min: 0, max: 1 }
