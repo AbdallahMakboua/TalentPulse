@@ -26,6 +26,7 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-talentpulse}:${POSTGRES_PASSWORD:-talentpulse_secret}@db:5432/${POSTGRES_DB:-talentpulse}
       DATABASE_URL_SYNC: postgresql://${POSTGRES_USER:-talentpulse}:${POSTGRES_PASSWORD:-talentpulse_secret}@db:5432/${POSTGRES_DB:-talentpulse}
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
     depends_on:
       db:
         condition: service_healthy

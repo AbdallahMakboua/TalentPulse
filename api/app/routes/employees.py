@@ -92,10 +92,13 @@ async def employee_questions(
     db: AsyncSession = Depends(get_db),
 ):
     """Generate 1:1 coaching agenda (Manager Coaching Copilot)."""
+    emp = await db.get(Employee, employee_id)
+    if not emp:
+        raise HTTPException(status_code=404, detail=f"Employee {employee_id} not found")
     try:
         return await generate_questions(db, employee_id)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Question generation failed: {e}")
 
 
 @router.post("/employees/{employee_id}/review-draft", response_model=ReviewDraftResponse)
@@ -104,10 +107,13 @@ async def employee_review_draft(
     db: AsyncSession = Depends(get_db),
 ):
     """Generate dynamic performance review draft."""
+    emp = await db.get(Employee, employee_id)
+    if not emp:
+        raise HTTPException(status_code=404, detail=f"Employee {employee_id} not found")
     try:
         return await generate_review(db, employee_id)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Review generation failed: {e}")
 
 
 @router.delete("/employees/{employee_id}/data")

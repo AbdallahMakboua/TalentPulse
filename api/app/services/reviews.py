@@ -18,6 +18,25 @@ from app.signals.compute import compute_all_trends
 from app.ollama_client import ollama
 
 
+def _normalize_str_list(items: list) -> list[str]:
+    """Ollama sometimes returns [{"key": "value"}, ...] instead of ["value", ...]. Flatten."""
+    result = []
+    for item in items:
+        if isinstance(item, str):
+            result.append(item)
+        elif isinstance(item, dict):
+            # Take the first string value from the dict
+            for v in item.values():
+                if isinstance(v, str):
+                    result.append(v)
+                    break
+            else:
+                result.append(str(item))
+        else:
+            result.append(str(item))
+    return result
+
+
 def _template_review(
     emp_name: str,
     period: str,
@@ -160,14 +179,14 @@ Generate a structured review as JSON:
             return ReviewDraftResponse(
                 employee_name=emp_name,
                 period=period,
-                highlights=data.get("highlights", []),
-                growth_areas=data.get("growth_areas", []),
-                risks=data.get("risks", []),
-                suggested_goals=data.get("suggested_goals", []),
-                summary=data.get("summary", ""),
+                highlights=_normalize_str_list(data.get("highlights", [])),
+                growth_areas=_normalize_str_list(data.get("growth_areas", [])),
+                risks=_normalize_str_list(data.get("risks", [])),
+                suggested_goals=_normalize_str_list(data.get("suggested_goals", [])),
+                summary=str(data.get("summary", "")),
                 generated_by="ollama",
             )
-    except (json.JSONDecodeError, KeyError):
+    except (json.JSONDecodeError, KeyError, TypeError, Exception):
         pass
 
     return None

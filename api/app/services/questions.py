@@ -14,6 +14,24 @@ from app.schemas import QuestionsResponse
 from app.ollama_client import ollama
 
 
+def _normalize_str_list(items: list) -> list[str]:
+    """Ollama sometimes returns [{"key": "value"}, ...] instead of ["value", ...]. Flatten."""
+    result = []
+    for item in items:
+        if isinstance(item, str):
+            result.append(item)
+        elif isinstance(item, dict):
+            for v in item.values():
+                if isinstance(v, str):
+                    result.append(v)
+                    break
+            else:
+                result.append(str(item))
+        else:
+            result.append(str(item))
+    return result
+
+
 # ── Template fallback ───────────────────────────────────────────────
 
 def _template_questions(emp_name: str, scores: dict, signals: dict) -> QuestionsResponse:
@@ -141,13 +159,13 @@ Respond in JSON format:
             data = json.loads(result[start:end])
             return QuestionsResponse(
                 employee_name=emp_name,
-                questions=data.get("questions", []),
-                listening_cues=data.get("listening_cues", []),
-                follow_up_actions=data.get("follow_up_actions", []),
-                context_notes=data.get("context_notes", []),
+                questions=_normalize_str_list(data.get("questions", [])),
+                listening_cues=_normalize_str_list(data.get("listening_cues", [])),
+                follow_up_actions=_normalize_str_list(data.get("follow_up_actions", [])),
+                context_notes=_normalize_str_list(data.get("context_notes", [])),
                 generated_by="ollama",
             )
-    except (json.JSONDecodeError, KeyError):
+    except (json.JSONDecodeError, KeyError, TypeError, Exception):
         pass
 
     return None
